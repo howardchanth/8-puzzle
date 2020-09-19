@@ -25,8 +25,11 @@ class Node:
 
     def __eq__(self, other):
         if not isinstance(other, Node):
-            return NotImplemented
+            return TypeError()
         return self.state == other.state
+
+    def __hash__(self):
+        return hash(tuple(self.state))
 
     def move(self, start, des):
         new_state = self.state[:]
@@ -74,16 +77,16 @@ class IDDFSSolver:
 
     # Depth-Limited Search
     def depth_limited_search(self, max_depth):
-        lqueue = LifoQueue()
-        visited = Queue()
+        stack = LifoQueue()
+        visited = set()
 
-        lqueue.put(self.start)
-        visited.put(self.start)
+        stack.put(self.start)
+        visited.add(self.start)
         n_nodes = 0
         while True:
-            if lqueue.empty():
+            if stack.empty():
                 return n_nodes, None
-            v = lqueue.get()
+            v = stack.get()
             n_nodes += 1
 
             if v.is_winning():
@@ -93,9 +96,9 @@ class IDDFSSolver:
                 next_moves = v.get_next_moves()
                 while not next_moves.empty():
                     w = next_moves.get()
-                    if w not in visited.queue:
-                        visited.put(w)
-                        lqueue.put(w)
+                    if w not in visited:
+                        visited.add(w)
+                        stack.put(w)
 
     def iterative_deepening_dfs(self, max_nodes=1000000):
         print("Iterative deepening searching")
@@ -111,7 +114,7 @@ class IDDFSSolver:
             if n_nodes > max_nodes:
                 return total_moves, None
             print(f"Depth level: {depth}")
-            print(f"Number of nodes: {n_nodes}")
+            print(f"Number of nodes of depth {depth}: {n_nodes}")
             print(f"Total number of nodes expanded: {total_moves}")
             depth += 1
 
@@ -119,6 +122,11 @@ class IDDFSSolver:
 class AStarSolver:
     def __init__(self, start_state, goal_state):
         self.start = Node(start_state, goal_state)
+
+    def astar(self):
+        stack = LifoQueue()
+        visited = Queue()
+
 
 
 def print_path(node):
