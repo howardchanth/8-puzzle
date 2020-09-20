@@ -1,5 +1,5 @@
-from queue import Queue
-import numpy as np
+from queue import Queue, PriorityQueue
+from itertools import count
 
 
 class Node:
@@ -16,13 +16,13 @@ class Node:
 
         # Heuristic function: Number of misplaced tiles
         self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
-                      for i in range(len(self.state))])
+                       for i in range(1, len(self.state))])
 
         # Heuristic function: Sum of Manhattan distances
         horizontal_distance = sum(abs((self.state.index(i) % 3) - (self.goal_state.index(i) % 3))
-                                  for i in range(len(self.state)))
+                                  for i in range(1, len(self.state)))
         vertical_distance = sum(abs((self.state.index(i) // 3) - (self.goal_state.index(i) // 3))
-                                for i in range(len(self.state)))
+                                for i in range(1, len(self.state)))
         self.h2 = horizontal_distance + vertical_distance
 
         # Total costs
@@ -83,18 +83,16 @@ class AStarSolver:
         self.start = Node(start_state, goal_state, is_h1)
 
     def astar_search(self):
-        stack = []
-        visited = set()
+        queue = PriorityQueue()
+        unique = count()
 
-        stack.append(self.start)
-
+        queue.put((self.start.f, next(unique), self.start))
         n_nodes = 0
 
-        while stack:
+        while not queue.empty():
+
             # Get next node
-            index = int(np.argmin([node.f for node in stack]))
-            v = stack.pop(index)
-            visited.add(v)
+            v = queue.get()[2]
             n_nodes += 1
 
             # If goal state, return number of nodes expanded and the node found
@@ -106,11 +104,9 @@ class AStarSolver:
             # Go through children
             while not next_moves.empty():
                 child = next_moves.get()
-                if child not in visited:
-                    visited.add(child)
-                if child not in stack:
-                    stack.append(child)
+                queue.put((child.f, next(unique), child))
 
+        return n_nodes, None
 
 
 def print_path(node):
@@ -144,7 +140,7 @@ solver = AStarSolver(start_state, goal_state, is_h1=is_h1)
 total_moves, result = solver.astar_search()
 
 if result:
-    # print_path(result)
+    print_path(result)
     print(f"Number of moves: {total_moves}")
 
 else:
