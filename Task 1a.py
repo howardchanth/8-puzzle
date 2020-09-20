@@ -38,31 +38,31 @@ class Node:
         return new_node
 
     def get_next_moves(self):
-        next_nodes = Queue()
+        next_nodes = []
         state = self.state[:]
         pos = state.index(0)
 
         # If position in the left column
         if pos % 3 == 0:
-            next_nodes.put(self.move(pos, pos + 1))
+            next_nodes.append(self.move(pos, pos + 1))
         # Position of zero in the middle column
         elif pos % 3 == 1:
-            next_nodes.put(self.move(pos, pos + 1))
-            next_nodes.put(self.move(pos, pos - 1))
+            next_nodes.append(self.move(pos, pos + 1))
+            next_nodes.append(self.move(pos, pos - 1))
         # Position of zero in the right column
         else:
-            next_nodes.put(self.move(pos, pos - 1))
+            next_nodes.append(self.move(pos, pos - 1))
 
         # If position in the upper row
         if pos // 3 == 0:
-            next_nodes.put(self.move(pos, pos + 3))
+            next_nodes.append(self.move(pos, pos + 3))
         # If position in the middle row
         elif pos // 3 == 1:
-            next_nodes.put(self.move(pos, pos + 3))
-            next_nodes.put(self.move(pos, pos - 3))
+            next_nodes.append(self.move(pos, pos + 3))
+            next_nodes.append(self.move(pos, pos - 3))
         # If position in the lower row
         else:
-            next_nodes.put(self.move(pos, pos - 3))
+            next_nodes.append(self.move(pos, pos - 3))
 
         return next_nodes
 
@@ -95,8 +95,8 @@ class IDDFSSolver:
 
             if v.level < max_depth:
                 next_moves = v.get_next_moves()
-                while not next_moves.empty():
-                    w = next_moves.get()
+                while next_moves:
+                    w = next_moves.pop()
                     if w not in visited:
                         stack.put(w)
                         visited.add(w)

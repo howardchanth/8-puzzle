@@ -14,21 +14,26 @@ class Node:
         else:
             self.level = parent.level + 1
 
-        # Heuristic function: Number of misplaced tiles
-        self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
-                       for i in range(1, len(self.state))])
 
-        # Heuristic function: Sum of Manhattan distances
-        horizontal_distance = sum(abs((self.state.index(i) % 3) - (self.goal_state.index(i) % 3))
-                                  for i in range(1, len(self.state)))
-        vertical_distance = sum(abs((self.state.index(i) // 3) - (self.goal_state.index(i) // 3))
-                                for i in range(1, len(self.state)))
-        self.h2 = horizontal_distance + vertical_distance
-
-        # Total costs
+        # self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
+        #                for i in range(1, len(self.state))])
         if is_h1:
+            # Heuristic function: Number of misplaced tiles
+            count = 0
+            for tile_value, goal_tile_value in zip(self.state, self.goal_state):
+                if tile_value != goal_tile_value:
+                    count += 1
+
+            self.h1 = count
             self.f = self.level + self.h1
         else:
+            # Heuristic function: Sum of Manhattan distances
+            horizontal_distance = sum(abs((self.state.index(i) % 3) - (self.goal_state.index(i) % 3))
+                                      for i in range(1, len(self.state)))
+            vertical_distance = sum(abs((self.state.index(i) // 3) - (self.goal_state.index(i) // 3))
+                                    for i in range(1, len(self.state)))
+            self.h2 = horizontal_distance + vertical_distance
+            # Total costs
             self.f = self.level + self.h2
 
     def __eq__(self, other):
@@ -46,31 +51,31 @@ class Node:
         return new_node
 
     def get_next_moves(self):
-        next_nodes = Queue()
+        next_nodes = []
         state = self.state[:]
         pos = state.index(0)
 
         # If position in the left column
         if pos % 3 == 0:
-            next_nodes.put(self.move(pos, pos + 1))
+            next_nodes.append(self.move(pos, pos + 1))
         # Position of zero in the middle column
         elif pos % 3 == 1:
-            next_nodes.put(self.move(pos, pos + 1))
-            next_nodes.put(self.move(pos, pos - 1))
+            next_nodes.append(self.move(pos, pos + 1))
+            next_nodes.append(self.move(pos, pos - 1))
         # Position of zero in the right column
         else:
-            next_nodes.put(self.move(pos, pos - 1))
+            next_nodes.append(self.move(pos, pos - 1))
 
         # If position in the upper row
         if pos // 3 == 0:
-            next_nodes.put(self.move(pos, pos + 3))
+            next_nodes.append(self.move(pos, pos + 3))
         # If position in the middle row
         elif pos // 3 == 1:
-            next_nodes.put(self.move(pos, pos + 3))
-            next_nodes.put(self.move(pos, pos - 3))
+            next_nodes.append(self.move(pos, pos + 3))
+            next_nodes.append(self.move(pos, pos - 3))
         # If position in the lower row
         else:
-            next_nodes.put(self.move(pos, pos - 3))
+            next_nodes.append(self.move(pos, pos - 3))
 
         return next_nodes
 
@@ -83,28 +88,31 @@ class AStarSolver:
         self.start = Node(start_state, goal_state, is_h1)
 
     def astar_search(self):
-        queue = PriorityQueue()
+        queue = PriorityQueue(maxsize=50000)
         unique = count()
 
         queue.put((self.start.f, next(unique), self.start))
+        visited = set()
         n_nodes = 0
 
         while not queue.empty():
 
             # Get next node
-            v = queue.get()[2]
+            current = queue.get()[2]
             n_nodes += 1
 
             # If goal state, return number of nodes expanded and the node found
-            if v.is_winning():
-                return n_nodes, v
+            if current.is_winning():
+                return n_nodes, current
 
-            next_moves = v.get_next_moves()
+            if current not in visited:
+                visited.add(current)
+                next_moves = current.get_next_moves()
 
-            # Go through children
-            while not next_moves.empty():
-                child = next_moves.get()
-                queue.put((child.f, next(unique), child))
+                # Go through children
+                while next_moves:
+                    child = next_moves.pop()
+                    queue.put((child.f, next(unique), child))
 
         return n_nodes, None
 
