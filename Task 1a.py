@@ -89,6 +89,7 @@ class IDDFSSolver:
             v = stack.get()
             n_nodes += 1
 
+            # If winning state, return search results and number of nodes expanded for this depth
             if v.is_winning():
                 return n_nodes, v
 
@@ -97,11 +98,11 @@ class IDDFSSolver:
                 while not next_moves.empty():
                     w = next_moves.get()
                     if w not in visited:
-                        visited.add(w)
                         stack.put(w)
+                        visited.add(w)
 
     def iterative_deepening_dfs(self, max_nodes=1000000):
-        print("Iterative deepening searching")
+        print("Iterative Deepening Search")
         # Repeat depth-limit search until maximum nodes explored
         depth = 0
         total_moves = 0
@@ -119,16 +120,6 @@ class IDDFSSolver:
             depth += 1
 
 
-class AStarSolver:
-    def __init__(self, start_state, goal_state):
-        self.start = Node(start_state, goal_state)
-
-    def astar(self):
-        stack = LifoQueue()
-        visited = Queue()
-
-
-
 def print_path(node):
     print(node.state)
     if node.parent:
@@ -138,7 +129,7 @@ def print_path(node):
     print_path(node.parent)
 
 
-"""Part a"""
+"""Task 1 a"""
 # Initial state fo the game:
 # 7 2 4
 # 5 0 6
@@ -159,12 +150,9 @@ solver = IDDFSSolver(start_state, goal_state)
 total_moves, result = solver.iterative_deepening_dfs()
 
 if result:
-    print(result)
+    print("Path found. The path generated is (from goal to start):")
     print_path(result)
     print(f"Number of moves: {total_moves}")
 
 else:
     print("Solution not found")
-
-
-"""Part b"""
