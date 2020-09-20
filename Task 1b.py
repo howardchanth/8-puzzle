@@ -1,6 +1,7 @@
 from queue import Queue
 import numpy as np
 
+
 class Node:
     def __init__(self, state, goal_state, is_h1, parent=None):
         self.state = state
@@ -14,8 +15,8 @@ class Node:
             self.level = parent.level + 1
 
         # Heuristic function: Number of misplaced tiles
-        self.h1 = sum(1 if self.state[i] == self.goal_state[i] else 0
-                      for i in range(len(self.state)))
+        self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
+                      for i in range(len(self.state))])
 
         # Heuristic function: Sum of Manhattan distances
         horizontal_distance = sum(abs((self.state.index(i) % 3) - (self.goal_state.index(i) % 3))
@@ -86,26 +87,30 @@ class AStarSolver:
         visited = set()
 
         stack.append(self.start)
-        visited.add(self.start)
+
         n_nodes = 0
 
         while stack:
             # Get next node
-            index = int(np.argmax([node.f for node in stack]))
+            index = int(np.argmin([node.f for node in stack]))
             v = stack.pop(index)
+            visited.add(v)
             n_nodes += 1
 
+            # If goal state, return number of nodes expanded and the node found
             if v.is_winning():
                 return n_nodes, v
 
             next_moves = v.get_next_moves()
-            while not next_moves.empty():
-                w = next_moves.get()
-                if w not in visited:
-                    visited.add(w)
-                    stack.append(w)
 
-        return n_nodes, None
+            # Go through children
+            while not next_moves.empty():
+                child = next_moves.get()
+                if child not in visited:
+                    visited.add(child)
+                if child not in stack:
+                    stack.append(child)
+
 
 
 def print_path(node):
@@ -134,7 +139,7 @@ with open("initial_state.txt", "r") as file:
 
 goal_state = [i for i in range(9)]
 # Use heuristic function 1 or 2
-is_h1 = False
+is_h1 = True
 solver = AStarSolver(start_state, goal_state, is_h1=is_h1)
 total_moves, result = solver.astar_search()
 
