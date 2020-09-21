@@ -15,16 +15,11 @@ class Node:
             self.level = parent.level + 1
 
 
-        # self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
-        #                for i in range(1, len(self.state))])
+        #
         if is_h1:
             # Heuristic function: Number of misplaced tiles
-            count = 0
-            for tile_value, goal_tile_value in zip(self.state, self.goal_state):
-                if tile_value != goal_tile_value:
-                    count += 1
-
-            self.h1 = count
+            self.h1 = self.h1 = sum([0 if self.state[i] == self.goal_state[i] else 1
+                                     for i in range(1, len(self.state))])
             self.f = self.level + self.h1
         else:
             # Heuristic function: Sum of Manhattan distances
@@ -117,13 +112,25 @@ class AStarSolver:
         return n_nodes, None
 
 
-def print_path(node):
-    print(node.state)
-    if node.parent:
-        print("-->")
-    else:
+def print_path(node, step=0):
+    def get_move_dir(node):
+        pos = node.parent.state.index(0) - node.state.index(0)
+        if pos == 3:
+            return 'Up'
+        elif pos == -3:
+            return 'Down'
+        elif pos == 1:
+            return 'Right'
+        else:
+            return 'Left'
+    if not node.parent:
+        print(f"Number of moves: {step}")
         return
-    print_path(node.parent)
+    print_path(node.parent, step + 1)
+    print(node.state)
+    print(f"Move {get_move_dir(node)}")
+
+
 
 
 """Task 1 a"""
@@ -143,13 +150,18 @@ with open("initial_state.txt", "r") as file:
 
 goal_state = [i for i in range(9)]
 # Use heuristic function 1 or 2
-is_h1 = True
+is_h1 = False
+if is_h1:
+    print("Finding solution with misplaced tiles as heuristic function")
+else:
+    print("Finding solution with Manhattan distance as heuristic function")
 solver = AStarSolver(start_state, goal_state, is_h1=is_h1)
 total_moves, result = solver.astar_search()
 
 if result:
-    print_path(result)
     print(f"Number of moves: {total_moves}")
+    print_path(result)
+
 
 else:
     print("Solution not found")

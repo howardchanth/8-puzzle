@@ -86,20 +86,20 @@ class IDDFSSolver:
         while True:
             if stack.empty():
                 return n_nodes, None
-            v = stack.get()
+            current = stack.get()
             n_nodes += 1
 
             # If winning state, return search results and number of nodes expanded for this depth
-            if v.is_winning():
-                return n_nodes, v
+            if current.is_winning():
+                return n_nodes, current
 
-            if v.level < max_depth:
-                next_moves = v.get_next_moves()
+            if current.level < max_depth:
+                next_moves = current.get_next_moves()
                 while next_moves:
-                    w = next_moves.pop()
-                    if w not in visited:
-                        stack.put(w)
-                        visited.add(w)
+                    child = next_moves.pop()
+                    if child not in visited:
+                        stack.put(child)
+                        visited.add(child)
 
     def iterative_deepening_dfs(self, max_nodes=1000000):
         print("Iterative Deepening Search")
@@ -120,16 +120,26 @@ class IDDFSSolver:
             depth += 1
 
 
-def print_path(node):
-    print(node.state)
-    if node.parent:
-        print("-->")
-    else:
+def print_path(node, step=0):
+    def get_move_dir(node):
+        pos = node.parent.state.index(0) - node.state.index(0)
+        if pos == 3:
+            return 'Up'
+        elif pos == -3:
+            return 'Down'
+        elif pos == 1:
+            return 'Right'
+        else:
+            return 'Left'
+    if not node.parent:
+        print(f"Number of moves:{step}")
+        print("Path found. The path generated is (from goal to start):")
         return
-    print_path(node.parent)
+    print_path(node.parent, step + 1)
+    print(node.state)
+    print(f"Move {get_move_dir(node)}")
 
 
-"""Task 1 a"""
 # Initial state fo the game:
 # 7 2 4
 # 5 0 6
@@ -150,9 +160,8 @@ solver = IDDFSSolver(start_state, goal_state)
 total_moves, result = solver.iterative_deepening_dfs()
 
 if result:
-    print("Path found. The path generated is (from goal to start):")
     print_path(result)
-    print(f"Number of moves: {total_moves}")
+    print(f"Number of nodes generated: {total_moves}")
 
 else:
     print("Solution not found")

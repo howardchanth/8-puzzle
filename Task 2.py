@@ -88,54 +88,58 @@ class Solver:
         return n_nodes, None
 
 
-def print_solution(sol):
-    stack = LifoQueue()
-    node = sol
-    while node.parent:
-        stack.put(sol)
-        node = node.parent
+# def print_solution(sol):
+#     stack = LifoQueue()
+#     node = sol
+#     while node.parent:
+#         stack.put(sol)
+#         node = node.parent
+#
+#     step = 1
+#     while stack:
+#         node = stack.get()
+#         print(f"Step : {step}")
+#         print(f"Boat position at the beginning of the step: {'left' if node.boat_left else 'right'}")
+#         if node.boat_left:
+#             cannibal_on_boat = node.left_cannibal - node.parent.left_cannibal
+#             missionary_on_boat = node.left_missionary - node.parent.left_missionary
+#         else:
+#             # Count difference of people on the right to get the number of people on the boat
+#             cannibal_on_boat = - (node.left_cannibal - node.parent.left_cannibal)
+#             missionary_on_boat = - (node.left_missionary - node.parent.left_missionary)
+#         print(f"Number of cannibals on the boat: {cannibal_on_boat}")
+#         print(f"Number of missionary on the boat: {missionary_on_boat}")
+#         step += 1
 
-    step = 1
-    while stack:
-        node = stack.get()
-        print(f"Step : {step}")
-        print(f"Boat position at the beginning of the step: {'left' if node.boat_left else 'right'}")
-        if node.boat_left:
-            cannibal_on_boat = node.left_cannibal - node.parent.left_cannibal
-            missionary_on_boat = node.left_missionary - node.parent.left_missionary
-        else:
-            # Count difference of people on the right to get the number of people on the boat
-            cannibal_on_boat = - (node.left_cannibal - node.parent.left_cannibal)
-            missionary_on_boat = - (node.left_missionary - node.parent.left_missionary)
-        print(f"Number of cannibals on the boat: {cannibal_on_boat}")
-        print(f"Number of missionary on the boat: {missionary_on_boat}")
-        step += 1
-
-# def print_solution(sol, step=0):
-#     if sol:
-#     print_solution(sol.parent, step+1)
-#     print(f"Step : {step}")
-#     print(f"Boat position at the beginning of the step: {'left' if sol.boat_left else 'right'}")
-#     if sol.boat_left:
-#         cannibal_on_boat = sol.left_cannibal - sol.parent.left_cannibal
-#         missionary_on_boat = sol.left_missionary - sol.parent.left_missionary
-#     else:
-#         # Count difference of people on the right to get the number of people on the boat
-#         cannibal_on_boat = - (sol.left_cannibal - sol.parent.left_cannibal)
-#         missionary_on_boat = - (sol.left_missionary - sol.parent.left_missionary)
-#     print(f"Number of cannibals on the boat: {cannibal_on_boat}")
-#     print(f"Number of missionary on the boat: {missionary_on_boat}")
+def print_solution(sol, step=1):
+    if not sol.parent:
+        print(f"Total number of steps: {step}")
+        print(f"Boat position at the beginning of the step: Left")
+        print(f"Number of cannibals on the left: 3")
+        print(f"Number of missionary on the left: 3")
+        return
+    print_solution(sol.parent, step + 1)
+    print(f"Boat position at the beginning of the step: {'left' if sol.boat_left else 'right'}")
+    if sol.boat_left:
+        cannibal_on_boat = sol.left_cannibal - sol.parent.left_cannibal
+        missionary_on_boat = sol.left_missionary - sol.parent.left_missionary
+    else:
+        # Count difference of people on the right to get the number of people on the boat
+        cannibal_on_boat = - (sol.left_cannibal - sol.parent.left_cannibal)
+        missionary_on_boat = - (sol.left_missionary - sol.parent.left_missionary)
+    print("On the boat: ")
+    print(f"Number of cannibals: {cannibal_on_boat}")
+    print(f"Number of missionaries: {missionary_on_boat}")
+    print("At the end of the step: ")
+    print(f"Number of cannibals on the left: {sol.left_cannibal}")
+    print(f"Number of missionaries on the left: {sol.left_missionary}")
 
 # Game starts
 
 solver = Solver()
 print("Game started")
-print(f"Step : 0")
-print(f"Boat position at the beginning of the step: Left")
-print(f"Number of cannibals on the boat: 3")
-print(f"Number of missionary on the boat: 3")
 
 n_nodes, sol = solver.bfs()
 
-# print_solution(sol)
+print_solution(sol)
 print(n_nodes)
